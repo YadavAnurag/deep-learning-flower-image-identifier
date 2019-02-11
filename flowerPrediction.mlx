@@ -1,0 +1,90 @@
+1.
+
+% Get Training Images
+
+flower_ds = imageDatastore('Flowers','IncludeSubfolders',true,'LabelSource','foldernames');
+[trainImgs,testImgs] = splitEachLabel(flower_ds,0.6);
+numClasses = numel(categories(flower_ds.Labels));
+
+
+% Create a network by modifying AlexNet
+
+net = alexnet;
+layers = net.Layers;
+layers(end-2) = fullyConnectedLayer(numClasses);
+layers(end) = classificationLayer;
+
+
+% Set training alogrithm options
+
+options = trainingOptions('sgdm','InitialLearnRate', 0.001);
+
+
+% Perform training
+
+[flowernet,info] = trainNetwork(trainImgs, layers, options);
+
+
+
+% Use trained network to classify test Images
+
+testpreds = classify(flowernet,testImgs);
+
+
+
+
+
+
+
+2. Evaluating training and test Performance
+
+% Load training informations
+
+load pathToImages
+load trainedFlowerNetwork flowernet info
+
+% Plot training loss
+
+plot(info.TrainingLoss)
+
+% This code creates a datastore of the flower images.
+
+dsflowers = imageDatastore(pathToImages,'IncludeSubfolders',true,'LabelSource','foldernames');
+[trainImgs,testImgs] = splitEachLabel(dsflowers,0.98);
+
+% classify Images
+
+flwrPreds = classify(flowernet,testImgs)
+
+
+
+
+3. Investigating Test Performance
+
+% This code sets up the Workspace for this activity.
+
+load pathToImages.mat
+pathToImages
+flwrds = imageDatastore(pathToImages,'IncludeSubfolders',true,'LabelSource','foldernames');
+[trainImgs,testImgs] = splitEachLabel(flwrds,0.98);
+load trainedFlowerNetwork flwrPreds
+
+% Extract labels
+
+flwrActual = testImgs.Labels;
+
+
+
+% Count correct
+
+numCorrect = nnz(flwrPreds == flwrActual)
+
+
+% Calculate fraction correct
+
+fracCorrect = numCorrect/numel(flwrPreds)
+
+
+% Display confusion matrix
+
+confusionchart(testImgs.Labels,flwrPreds)
